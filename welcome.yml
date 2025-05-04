@@ -1,17 +1,21 @@
-name: Welcome New Contributor
+name: Welcome New Contributors
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 jobs:
-  greet-new-contributor:
+  welcome:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
     steps:
-      - name: Check if this is the contributor's first PR
-        uses: actions/first-interaction@v1
+      - name: Greet the contributor
+        uses: actions/github-script@v6
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          pr-message: |
-            👋 Hello and welcome! Thank you for your first contribution 🎉
-            We appreciate your effort and look forward to more contributions from you!
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "👋 Hello @${{ github.actor }}, thanks for opening your first pull request! We appreciate your contribution 🎉"
+            })
